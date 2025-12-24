@@ -101,10 +101,12 @@
     <section id="cabañas" class="containerWidth">
         <h1 class="font-bold text-3xl text-center mt-20">Cabañas</h1>
         <div class="w-full grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-20"> <img src="/images/cabañas1.png"
-                alt="cabañas" class="w-full max-h-[400px] object-cover rounded-3xl" width="300" height="300" loading="lazy" decoding="async">
-            <img src="/images/cabañas2.png" alt="cabañas" class="w-full max-h-[400px] object-cover rounded-3xl" width="300" height="300"
-                loading="lazy" decoding="async"> <img src="/images/cabañas3.png" alt="cabañas"
-                class="w-full max-h-[400px] object-cover rounded-3xl" width="300" height="300" loading="lazy" decoding="async">
+                alt="cabañas" class="w-full max-h-[400px] object-cover rounded-3xl" width="300" height="300"
+                loading="lazy" decoding="async">
+            <img src="/images/cabañas2.png" alt="cabañas" class="w-full max-h-[400px] object-cover rounded-3xl"
+                width="300" height="300" loading="lazy" decoding="async"> <img src="/images/cabañas3.png" alt="cabañas"
+                class="w-full max-h-[400px] object-cover rounded-3xl" width="300" height="300" loading="lazy"
+                decoding="async">
         </div>
     </section>
     <section id="servicios" class="containerWidth">
@@ -264,19 +266,20 @@
                                 Sur, Rivadavia, San Juan</span> </div>
                     </div>
                     <div class=" w-full lg:w-[33%]">
-                        <form action="contact.php" method="POST">
-                            <div class="flex flex-col gap-1"> <label for="">Nombre</label> <input name="fullname"
-                                    class="p-2 rounded-xl border border-[#D9D9D9] outline-none" type="text"
-                                    placeholder="Ingresa tu nombre completo"> </div>
-                            <div class="flex flex-col gap-1"> <label for="">Email</label> <input name="email"
+                        <form action="contact.php" method="POST" id="contact-form">
+                            <div class="flex flex-col gap-1"> <label for="">Nombre</label> <input id="fullname"
+                                    name="fullname" class="p-2 rounded-xl border border-[#D9D9D9] outline-none"
+                                    type="text" placeholder="Ingresa tu nombre completo"> </div>
+                            <div class="flex flex-col gap-1"> <label for="">Email</label> <input id="email" name="email"
                                     class="p-2 rounded-xl border border-[#D9D9D9] outline-none" type="text"
                                     placeholder="Ingresa tu dirección de correo electrónico"> </div>
                             <div class="flex flex-col gap-1"> <label for="">Mensaje</label> <textarea
                                     class="p-2 rounded-xl border border-[#D9D9D9] outline-none"
-                                    placeholder="Escribe tu mensaje aquí.." name="message" id=""></textarea> </div>
+                                    placeholder="Escribe tu mensaje aquí.." id="message" name="message"
+                                    id=""></textarea> </div>
                             <button name="submit" value="true"
                                 class="text-white w-full mt-4 rounded-[20px] bg-Principal px-4 py-2 cursor-pointer"
-                                type="submit">Enviar</button>
+                                type="submit" id="btnEnviar">Enviar</button>
                         </form>
                     </div>
                 </div>
@@ -285,6 +288,14 @@
                     class="" width="300" height="300" loading="lazy" decoding="async"> </div>
         </div>
     </section>
+
+    <div class="contenedor-modal-mensaje">
+        <div class="modal-mensaje">
+            <p>Enviado con éxito. <br>
+                Pronto nos pondremos en contacto</p>
+            <button type="button">Aceptar</button>
+        </div>
+    </div>
 
     <script>
         function openWhatsapp() {
@@ -296,6 +307,8 @@
 
         const menu = document.querySelector("#menu");
         const burger = document.querySelector(".hamburguer");
+        let formEnviadoOk = false;
+
 
         burger.addEventListener("click", () => {
             menu.classList.toggle("menu-open");
@@ -309,6 +322,71 @@
                 link.classList.add('active');
             });
         });
+
+
+        document.querySelector("form").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            btnEnviar.disabled = true;
+            btnEnviar.textContent = 'Enviando...';
+
+            const fullname = document.getElementById("fullname").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const message = document.getElementById("message").value.trim();
+
+            // Referencias al modal y al texto
+            const modalCont = document.querySelector(".contenedor-modal-mensaje");
+            const modalText = modalCont.querySelector(".modal-mensaje p");
+
+            // 🔹 Validación: campos vacíos
+            if (!fullname || !email || !message) {
+                modalText.innerHTML = "Por favor, complete todos los campos antes de enviar.";
+                modalCont.style.display = "flex";
+                btnEnviar.disabled = false;
+                btnEnviar.textContent = 'Enviar';
+                return;
+            }
+
+            const data = { fullname, email, message };
+
+            try {
+                const res = await fetch("contact.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await res.json();
+
+                if (result.status === "success") {
+                    modalText.innerHTML = "¡Correo enviado correctamente!<br>Pronto nos pondremos en contacto";
+                    modalCont.style.display = "flex";
+                    formEnviadoOk = true;
+                } else {
+                    modalText.innerHTML = "Error: " + result.message;
+                    modalCont.style.display = "flex";
+                    formEnviadoOk = false;
+                }
+            } catch (err) {
+                console.log(err);
+                modalText.innerHTML = "Ocurrió un error al intentar enviar el formulario, intente nuevamente.";
+                modalCont.style.display = "flex";
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.textContent = 'Enviar';
+            }
+        });
+
+
+        document.querySelector(".modal-mensaje button").addEventListener("click", function () {
+            document.querySelector(".contenedor-modal-mensaje").style.display = "none";
+            btnEnviar.disabled = false;
+            btnEnviar.textContent = 'Enviar';
+
+            if (formEnviadoOk) {
+                window.location.reload(true);
+            }
+        });
+
     </script>
 </body>
 

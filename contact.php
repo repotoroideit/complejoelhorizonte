@@ -10,28 +10,28 @@ error_reporting(E_ALL);
 
 if (isset($_POST['submit'])) {
 
-require '/home/c2660440/public_html/PHPMailer/src/Exception.php';
-require '/home/c2660440/public_html/PHPMailer/src/PHPMailer.php';
-require '/home/c2660440/public_html/PHPMailer/src/SMTP.php';
+    require '/home/c2660440/public_html/PHPMailer/src/Exception.php';
+    require '/home/c2660440/public_html/PHPMailer/src/PHPMailer.php';
+    require '/home/c2660440/public_html/PHPMailer/src/SMTP.php';
 
-$mail = new PHPMailer(true);
+    $mail = new PHPMailer(true);
 
-try {
-                    
-    $mail->isSMTP();                                            
-    $mail->Host       = 'c1661514.ferozo.com'; 
-    
-    $mail->SMTPAuth   = true;                                   
-    $mail->Username   = 'reservas@complejoelhorizonte.com.ar';                     
-    $mail->Password   = 'hUHop7dwe798302';                               
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;        
-    $mail->Port       = 465;                                   
+    try {
 
-     $name = $_POST['fullname'];
-     $email = $_POST['email'];
-     $message = $_POST['message'];
+        $mail->isSMTP();
+        $mail->Host       = 'c1661514.ferozo.com';
 
-     $mailContent = "
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'reservas@complejoelhorizonte.com.ar';
+        $mail->Password   = 'hUHop7dwe798302';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
+
+        $name = $_POST['fullname'];
+        $email = $_POST['email'];
+        $message = $_POST['message'];
+
+        $mailContent = "
      <!DOCTYPE html>
      <html>
      <head>
@@ -102,21 +102,20 @@ try {
      </html>
      ";
 
-    $mail->setFrom('web@complejoelhorizonte.com.ar', 'Contacto WEB');
-    $mail->addAddress('reservas@complejoelhorizonte.com.ar');
-    $mail->isHTML(true);                                 
-    $mail->Subject = 'Contacto WEB - ' . $name;
-    $mail->Body    = $mailContent;
+        $mail->setFrom('web@complejoelhorizonte.com.ar', 'Contacto WEB');
+        $mail->addAddress('reservas@complejoelhorizonte.com.ar');
+        $mail->isHTML(true);
+        $mail->Subject = 'Contacto WEB - ' . $name;
+        $mail->Body    = $mailContent;
 
-    $mail->send();
-    
-	
-    header( 'Location: index.html' ) ;
+        $mail->send();
 
-} catch (Exception $e) {
-    echo 'Mailer Error: ' . $mail->ErrorInfo;
-	header( 'Location: index.html' ) ;
+
+        header('Location: index.html');
+    } catch (Exception $e) {
+        echo json_encode([
+            "status" => "error",
+            "message" => "Error de envío: " . $e->getMessage()
+        ]);
+    }
 }
-}
-
-?>
